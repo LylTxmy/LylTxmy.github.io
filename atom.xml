@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2019-03-22T01:09:32.531Z</updated>
+  <updated>2019-03-22T01:12:26.137Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -21,15 +21,15 @@
     <link href="http://yoursite.com/2019/03/22/webkali/"/>
     <id>http://yoursite.com/2019/03/22/webkali/</id>
     <published>2019-03-22T01:09:09.000Z</published>
-    <updated>2019-03-22T01:09:32.531Z</updated>
+    <updated>2019-03-22T01:12:26.137Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="1"><a href="#1" class="headerlink" title="1"></a>1</h1>]]></content>
+    <content type="html"><![CDATA[<h1 id="一-kali中安装shellinabox"><a href="#一-kali中安装shellinabox" class="headerlink" title="一. kali中安装shellinabox"></a>一. kali中安装shellinabox</h1><p>准备：shellinabox、ngrok</p><p>apt-get install shellinabox</p><p><img src="/2019/03/22/webkali/C:/Users/HP/Desktop/webkali/1.png" alt="示例图片" title="例"></p><h1 id="二-创建kali账号开启shellinabox"><a href="#二-创建kali账号开启shellinabox" class="headerlink" title="二. 创建kali账号开启shellinabox"></a>二. 创建kali账号开启shellinabox</h1><p>useradd ghacker</p><p>passwd ghacker</p><p><img src="/2019/03/22/webkali/C:/Users/HP/Desktop/webkali/2.png" alt="示例图片" title="例"></p><p>开启shellinabox：</p><p>shellinaboxd -b -t</p><p><img src="/2019/03/22/webkali/C:/Users/HP/Desktop/webkali/3.png" alt="示例图片" title="例"></p><p>-b 后台启动</p><p>-t http方式启动</p><p>可以在kali系统中用通过 <a href="http://ip:4200访问web版kali" target="_blank" rel="noopener">http://ip:4200访问web版kali</a></p><p><img src="/2019/03/22/webkali/C:/Users/HP/Desktop/webkali/4.png" alt="示例图片" title="例"></p><p>无论哪种安装方式，安装后可编辑/etc/sysconfig/shellinaboxd配置文件来更改端口，默认是4200端口</p><h1 id="三-外网映射"><a href="#三-外网映射" class="headerlink" title="三.  外网映射"></a>三.  外网映射</h1><p>去ngrok的官网，隧道开通，香港免费的。协议选http，隧道名称跟前置域名自定义，本地端口写kali服务器的端口，ip写kali的ip，端口就写ssh web的端口4200，http验证用户名跟密码选填，最后直接点确定添加。</p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;h1 id=&quot;1&quot;&gt;&lt;a href=&quot;#1&quot; class=&quot;headerlink&quot; title=&quot;1&quot;&gt;&lt;/a&gt;1&lt;/h1&gt;
+        &lt;h1 id=&quot;一-kali中安装shellinabox&quot;&gt;&lt;a href=&quot;#一-kali中安装shellinabox&quot; class=&quot;headerlink&quot; title=&quot;一. kali中安装shellinabox&quot;&gt;&lt;/a&gt;一. kali中安装shellinabox&lt;/h1
       
     
     </summary>
