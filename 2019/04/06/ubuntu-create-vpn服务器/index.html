@@ -10,6 +10,10 @@
 
     <!--Description-->
     
+        <meta name="description" content="在Ubuntu上搭建VPN方法很多，常见的三种方法分别是PPTP,L2TP/IPsec，OpenVPN。其中PPTP是配置最简单的方式，本次配置使用PPTP方式。
+1.在Ubuntu服务上建立pptp server，需要安装包pptpd，用apt-get方式安装。
+sudo apt-get inst">
+    
 
     <!--Author-->
     
@@ -18,7 +22,7 @@
 
     <!--Open Graph Title-->
     
-        <meta property="og:title" content="tags">
+        <meta property="og:title" content="ubuntu_create_vpn服务器">
     
 
     <!--Open Graph Description-->
@@ -40,7 +44,7 @@
 
     <!-- Title -->
     
-    <title>tags - Hexo</title>
+    <title>ubuntu_create_vpn服务器 - Hexo</title>
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
@@ -95,26 +99,26 @@
     <div class="col-sm-12">
 
         <!--Title and Logo-->
-        
-            <header>
+        <header>
     <div class="logo">
         <a href="/"><i class="logo-icon fa " aria-hidden="true"></i></a>
         
     </div>
 </header>
-            <section class="main">
-                
+
+        <section class="main">
+            
 <div class="post">
 
     <div class="post-header">
         <h1 class="title">
-            <a href="/tags/index.html">
-                tags
+            <a href="/2019/04/06/ubuntu-create-vpn服务器/">
+                ubuntu_create_vpn服务器
             </a>
         </h1>
         <div class="post-info">
             
-                <span class="date">2019-03-17</span>
+                <span class="date">2019-04-06</span>
             
             
             
@@ -127,7 +131,39 @@
         
 
         <!-- Post Content -->
-        
+        <p>在Ubuntu上搭建VPN方法很多，常见的三种方法分别是PPTP,L2TP/IPsec，OpenVPN。其中PPTP是配置最简单的方式，本次配置使用PPTP方式。</p>
+<p>1.在Ubuntu服务上建立pptp server，需要安装包pptpd，用apt-get方式安装。</p>
+<p><strong>sudo apt-get install pptpd</strong></p>
+<p>2.配置文件/etc/pptpd.conf</p>
+<p><strong>sudo vi /etc/pptpd.conf</strong></p>
+<p>在文件末尾找到localip和remoteio两个参数，去掉注释并修改。localip是VPN连通后服务器的ip地址，remoteip是客户端可以分配的地址</p>
+<p>localip 10.100.0.1<br>remoteip 10.100.0.2-10</p>
+<p>3.配置文件/etc/ppp/pptp-options</p>
+<p><strong>sudo vi /etc/ppp/pptp-options</strong></p>
+<p>修改ms-dns选项，为 VPN 客户端指派 DNS 服务器地址：</p>
+<p><img src="/2019/04/06/ubuntu-create-vpn服务器/1.png" alt="示例图片" title="例"> </p>
+<p>4.修改/etc/ppp/chap-secrets文件，存放VPN的用户名和密码，根据实际情况填写即可。第一列是用户名，第二列是服务器名，第三列是密码，第四列是IP限制</p>
+<p><strong>sudo vi /etc/ppp/chap-secrets</strong></p>
+<p><img src="/2019/04/06/ubuntu-create-vpn服务器/2.png" alt="示例图片" title="例"> </p>
+<p>此时连接VPN的客户端除了访问该服务器的资源外，其余内外和互联网的内容均无法访问。</p>
+<p>5.开启内核IP转发</p>
+<p><strong>sudo vi etc/sysctl.conf</strong></p>
+<p>取消net.ipv4.ip_forward=1这一行的注释，再执行</p>
+<p><strong>sudo sysctl -p</strong></p>
+<p>使配置文件生效</p>
+<p><img src="/2019/04/06/ubuntu-create-vpn服务器/3.png" alt="示例图片" title="例">    </p>
+<p>6.安装iptables，实现请求的NAT转发</p>
+<p><strong>sudo apt-get install iptables</strong></p>
+<p>装好后在nat表中加入一条规则：</p>
+<p><strong>sudo iptables -t nat -A POSTROUTING -s 10.100.0.0/24 -o eth0 -j MASQUERADE</strong></p>
+<p>Iptables的规则会在下次重启时被清除，把它保存下来，用iptables-save命令：</p>
+<p><strong>sudo iptables-save &gt; /etc/iptables-rules</strong></p>
+<p>修改/etc/network/interfaces文件，在末尾添加</p>
+<p>pre-up iptables-restore &lt;/etc/iptables-rules</p>
+<p>这样当网卡eth0被加载时就会自动载入我们预先用iptables-save保存的设置。</p>
+<p>7.重启pptpd服务，搭建完成，在win10上实验一下。</p>
+<p><img src="/2019/04/06/ubuntu-create-vpn服务器/4.png" alt="示例图片" title="例"> </p>
+
     </div>
 
     
@@ -138,8 +174,8 @@
     
 
 </div>
-            </section>
-        
+        </section>
+
     </div>
 </div>
 
