@@ -11,8 +11,8 @@
     <!--Description-->
     
         <meta name="description" content="在Ubuntu上搭建VPN方法很多，常见的三种方法分别是PPTP,L2TP/IPsec，OpenVPN。其中PPTP是配置最简单的方式，本次配置使用PPTP方式。
-1.在Ubuntu服务上建立pptp server，需要安装包pptpd，用apt-get方式安装。
-sudo apt-get inst">
+1.安装pptpd在Ubuntu服务上建立pptp server，需要安装包pptpd，用apt-get方式安装。
+sudo apt-g">
     
 
     <!--Author-->
@@ -132,37 +132,37 @@ sudo apt-get inst">
 
         <!-- Post Content -->
         <p>在Ubuntu上搭建VPN方法很多，常见的三种方法分别是PPTP,L2TP/IPsec，OpenVPN。其中PPTP是配置最简单的方式，本次配置使用PPTP方式。</p>
-<p>1.在Ubuntu服务上建立pptp server，需要安装包pptpd，用apt-get方式安装。</p>
-<p><strong>sudo apt-get install pptpd</strong></p>
-<p>2.配置文件/etc/pptpd.conf</p>
-<p><strong>sudo vi /etc/pptpd.conf</strong></p>
+<h1 id="1-安装pptpd"><a href="#1-安装pptpd" class="headerlink" title="1.安装pptpd"></a>1.安装pptpd</h1><p>在Ubuntu服务上建立pptp server，需要安装包pptpd，用apt-get方式安装。</p>
+<p><code>sudo apt-get install pptpd</code></p>
+<h1 id="2-配置文件-etc-pptpd-conf"><a href="#2-配置文件-etc-pptpd-conf" class="headerlink" title="2.配置文件/etc/pptpd.conf"></a>2.配置文件/etc/pptpd.conf</h1><p><code>sudo vi /etc/pptpd.conf</code></p>
 <p>在文件末尾找到localip和remoteio两个参数，去掉注释并修改。localip是VPN连通后服务器的ip地址，remoteip是客户端可以分配的地址</p>
-<p>localip 10.100.0.1<br>remoteip 10.100.0.2-10</p>
-<p>3.配置文件/etc/ppp/pptp-options</p>
-<p><strong>sudo vi /etc/ppp/pptp-options</strong></p>
+<p><code>localip 192.168.0.1</code></p>
+<p><code>remoteip 192.168.0.234-238,192.168.0.245</code></p>
+<h1 id="3-配置文件-etc-ppp-pptp-options"><a href="#3-配置文件-etc-ppp-pptp-options" class="headerlink" title="3.配置文件/etc/ppp/pptp-options"></a>3.配置文件/etc/ppp/pptp-options</h1><p><code>sudo vi /etc/ppp/pptp-options</code></p>
 <p>修改ms-dns选项，为 VPN 客户端指派 DNS 服务器地址：</p>
 <p><img src="/2019/04/06/ubuntu-create-vpn服务器/1.png" alt="示例图片" title="例"> </p>
-<p>4.修改/etc/ppp/chap-secrets文件，存放VPN的用户名和密码，根据实际情况填写即可。第一列是用户名，第二列是服务器名，第三列是密码，第四列是IP限制</p>
-<p><strong>sudo vi /etc/ppp/chap-secrets</strong></p>
+<h1 id="4-设置vpn账户"><a href="#4-设置vpn账户" class="headerlink" title="4.设置vpn账户"></a>4.设置vpn账户</h1><p>修改/etc/ppp/chap-secrets文件，存放VPN的用户名和密码，根据实际情况填写即可。第一列是用户名，第二列是服务器名，第三列是密码，第四列是IP限制</p>
+<p><code>sudo vi /etc/ppp/chap-secrets</code></p>
 <p><img src="/2019/04/06/ubuntu-create-vpn服务器/2.png" alt="示例图片" title="例"> </p>
 <p>此时连接VPN的客户端除了访问该服务器的资源外，其余内外和互联网的内容均无法访问。</p>
-<p>5.开启内核IP转发</p>
-<p><strong>sudo vi etc/sysctl.conf</strong></p>
+<h1 id="5-开启内核IP转发"><a href="#5-开启内核IP转发" class="headerlink" title="5.开启内核IP转发"></a>5.开启内核IP转发</h1><p><code>sudo vi etc/sysctl.conf</code></p>
 <p>取消net.ipv4.ip_forward=1这一行的注释，再执行</p>
-<p><strong>sudo sysctl -p</strong></p>
+<p><code>sudo sysctl -p</code></p>
 <p>使配置文件生效</p>
 <p><img src="/2019/04/06/ubuntu-create-vpn服务器/3.png" alt="示例图片" title="例">    </p>
-<p>6.安装iptables，实现请求的NAT转发</p>
-<p><strong>sudo apt-get install iptables</strong></p>
-<p>装好后在nat表中加入一条规则：</p>
-<p><strong>sudo iptables -t nat -A POSTROUTING -s 10.100.0.0/24 -o eth0 -j MASQUERADE</strong></p>
-<p>Iptables的规则会在下次重启时被清除，把它保存下来，用iptables-save命令：</p>
-<p><strong>sudo iptables-save &gt; /etc/iptables-rules</strong></p>
-<p>修改/etc/network/interfaces文件，在末尾添加</p>
-<p>pre-up iptables-restore &lt;/etc/iptables-rules</p>
-<p>这样当网卡eth0被加载时就会自动载入我们预先用iptables-save保存的设置。</p>
-<p>7.重启pptpd服务，搭建完成，在win10上实验一下。</p>
-<p><img src="/2019/04/06/ubuntu-create-vpn服务器/4.png" alt="示例图片" title="例"> </p>
+<h1 id="6-安装iptables，实现请求的NAT转发"><a href="#6-安装iptables，实现请求的NAT转发" class="headerlink" title="6.安装iptables，实现请求的NAT转发"></a>6.安装iptables，实现请求的NAT转发</h1><h5 id="1-安装iptables"><a href="#1-安装iptables" class="headerlink" title="1.安装iptables"></a>1.安装iptables</h5><p><code>sudo apt-get install iptables</code></p>
+<h5 id="2-允许gre协议以及1723、47端口"><a href="#2-允许gre协议以及1723、47端口" class="headerlink" title="2.允许gre协议以及1723、47端口"></a>2.允许gre协议以及1723、47端口</h5><p><code>sudo iptables -A INPUT -p gre -j ACCEPT</code></p>
+<p><code>sudo iptables -A INPUT -p tcp --dport 1723 -j ACCEPT</code> </p>
+<p><code>sudo iptables -A INPUT -p tcp --dport 47 -j ACCEPT</code></p>
+<h5 id="3-开启NAT转发"><a href="#3-开启NAT转发" class="headerlink" title="3.开启NAT转发"></a>3.开启NAT转发</h5><p><code>sudo iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o ens33 -j MASQUERADE</code></p>
+<h5 id="4-保存"><a href="#4-保存" class="headerlink" title="4.保存"></a>4.保存</h5><p>Iptables的规则会在下次重启时被清除，把它保存下来，用iptables-save命令：</p>
+<p> <code>sudo iptables-save &gt; /etc/iptables-rules</code></p>
+<h5 id="5-修改配置"><a href="#5-修改配置" class="headerlink" title="5.修改配置"></a>5.修改配置</h5><p>修改/etc/network/interfaces文件，在末尾添加</p>
+<p> <code>pre-up iptables-restore &lt;/etc/iptables-rules</code></p>
+<p>这样当网卡ens33被加载时就会自动载入我们预先用iptables-save保存的设置。</p>
+<h1 id="7-收工"><a href="#7-收工" class="headerlink" title="7.收工"></a>7.收工</h1><p>重启pptpd服务，搭建完成，在其他虚拟机上实验一下。</p>
+<p><img src="/2019/04/06/ubuntu-create-vpn服务器/4.png" alt="示例图片" title="例"></p>
+<p>可以上网。</p>
 
     </div>
 
