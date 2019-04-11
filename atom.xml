@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2019-04-06T12:01:52.553Z</updated>
+  <updated>2019-04-11T12:37:45.091Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,20 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>MSF浏览器自动攻击</title>
+    <link href="http://yoursite.com/2019/04/11/MSF%E6%B5%8F%E8%A7%88%E5%99%A8%E8%87%AA%E5%8A%A8%E6%94%BB%E5%87%BB-1/"/>
+    <id>http://yoursite.com/2019/04/11/MSF浏览器自动攻击-1/</id>
+    <published>2019-04-11T12:37:45.000Z</published>
+    <updated>2019-04-11T12:37:45.091Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>ubuntu_create_vpn服务器</title>
