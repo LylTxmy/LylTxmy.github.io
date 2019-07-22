@@ -81,18 +81,18 @@
 
 
 
-<meta name="description" content="一.sql注入漏洞原理：（1）有一个参数用户可控； （2）服务器对该参数没有过滤或者过滤不够严谨； 本质:把用户输入的数据and1=1当作代码执行，违背了“数据与代码分离”的原则 条件：用户能控制输入的内容 web应用把用户输入的内容带入到数据库中执行（不过滤或者过滤不严谨） 危害：读取数据库的数据 修改或者删除数据 getshell  往服务器读取文件 二.万能密码传入SQL语句可控参数分为两类">
+<meta name="description" content="一.sql注入漏洞原理：（1）有一个参数用户可控； （2）服务器对该参数没有过滤或者过滤不够严谨； 本质:把用户输入的数据and1=1当作代码执行，违背了“数据与代码分离”的原则 条件：用户能控制输入的内容 web应用把用户输入的内容带入到数据库中执行（不过滤或者过滤不严谨） 危害：读取数据库的数据 修改或者删除数据 getshell  往服务器读取文件 二.万能密码传入SQL语句可控参数分为两">
 <meta name="keywords" content="sql注入">
 <meta property="og:type" content="article">
 <meta property="og:title" content="sql注入小结">
 <meta property="og:url" content="http://yoursite.com/2019/04/11/sql注入小结/index.html">
 <meta property="og:site_name" content="Cancrie&#39;s blog.">
-<meta property="og:description" content="一.sql注入漏洞原理：（1）有一个参数用户可控； （2）服务器对该参数没有过滤或者过滤不够严谨； 本质:把用户输入的数据and1=1当作代码执行，违背了“数据与代码分离”的原则 条件：用户能控制输入的内容 web应用把用户输入的内容带入到数据库中执行（不过滤或者过滤不严谨） 危害：读取数据库的数据 修改或者删除数据 getshell  往服务器读取文件 二.万能密码传入SQL语句可控参数分为两类">
+<meta property="og:description" content="一.sql注入漏洞原理：（1）有一个参数用户可控； （2）服务器对该参数没有过滤或者过滤不够严谨； 本质:把用户输入的数据and1=1当作代码执行，违背了“数据与代码分离”的原则 条件：用户能控制输入的内容 web应用把用户输入的内容带入到数据库中执行（不过滤或者过滤不严谨） 危害：读取数据库的数据 修改或者删除数据 getshell  往服务器读取文件 二.万能密码传入SQL语句可控参数分为两">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-07-14T11:27:53.539Z">
+<meta property="og:updated_time" content="2019-07-22T13:36:34.543Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="sql注入小结">
-<meta name="twitter:description" content="一.sql注入漏洞原理：（1）有一个参数用户可控； （2）服务器对该参数没有过滤或者过滤不够严谨； 本质:把用户输入的数据and1=1当作代码执行，违背了“数据与代码分离”的原则 条件：用户能控制输入的内容 web应用把用户输入的内容带入到数据库中执行（不过滤或者过滤不严谨） 危害：读取数据库的数据 修改或者删除数据 getshell  往服务器读取文件 二.万能密码传入SQL语句可控参数分为两类">
+<meta name="twitter:description" content="一.sql注入漏洞原理：（1）有一个参数用户可控； （2）服务器对该参数没有过滤或者过滤不够严谨； 本质:把用户输入的数据and1=1当作代码执行，违背了“数据与代码分离”的原则 条件：用户能控制输入的内容 web应用把用户输入的内容带入到数据库中执行（不过滤或者过滤不严谨） 危害：读取数据库的数据 修改或者删除数据 getshell  往服务器读取文件 二.万能密码传入SQL语句可控参数分为两">
 
 
 
@@ -324,7 +324,8 @@
       
 
       
-        <h1 id="一-sql注入漏洞"><a href="#一-sql注入漏洞" class="headerlink" title="一.sql注入漏洞"></a>一.sql注入漏洞</h1><h5 id="原理："><a href="#原理：" class="headerlink" title="原理："></a>原理：</h5><p>（1）有一个参数用户可控；</p>
+        <a id="more"></a>
+<h1 id="一-sql注入漏洞"><a href="#一-sql注入漏洞" class="headerlink" title="一.sql注入漏洞"></a>一.sql注入漏洞</h1><h5 id="原理："><a href="#原理：" class="headerlink" title="原理："></a>原理：</h5><p>（1）有一个参数用户可控；</p>
 <p>（2）服务器对该参数没有过滤或者过滤不够严谨；</p>
 <h5 id="本质"><a href="#本质" class="headerlink" title="本质:"></a>本质:</h5><p>把用户输入的数据and1=1当作代码执行，违背了“数据与代码分离”的原则</p>
 <h5 id="条件："><a href="#条件：" class="headerlink" title="条件："></a>条件：</h5><p>用户能控制输入的内容</p>
